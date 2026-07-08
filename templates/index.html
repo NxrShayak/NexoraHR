@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexora HR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Sora', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace']
+        },
+        colors: {
+          brand: { 500: '#7C3AED', 600: '#6D28D9', 700: '#4F46E5' }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background:#F3F4F6; }
+  h1,h2,h3,h4,.font-display { font-family: 'Sora', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .gradient-brand { background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #C4B5FD; border-radius: 4px; }
+  .modal-backdrop { background: rgba(17,24,39,0.55); }
+  .nav-link.active { background: rgba(255,255,255,0.15); }
+  table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #6B7280; }
+  .pill { display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body class="text-gray-800">
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="login-screen" class="min-h-screen flex">
+  <div class="hidden lg:flex w-1/2 gradient-brand relative overflow-hidden flex-col justify-between p-12 text-white">
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full"></div>
+    <div class="absolute -bottom-32 -left-10 w-80 h-80 bg-white/10 rounded-full"></div>
+    <div class="relative z-10 flex items-center gap-2">
+      <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+        <i data-lucide="sparkles" class="w-6 h-6"></i>
+      </div>
+      <span class="font-display font-bold text-xl">Nexora HR</span>
+    </div>
+    <div class="relative z-10">
+      <h1 class="font-display text-4xl font-800 leading-tight mb-4">People management,<br>beautifully simplified.</h1>
+      <p class="text-violet-100 max-w-sm">Manage employees, departments, attendance, leaves and payroll — all from one vibrant, modern dashboard.</p>
+    </div>
+    <div class="relative z-10 text-violet-200 text-sm">© 2026 Nexora HR. All rights reserved.</div>
+  </div>
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
+    <div class="w-full max-w-sm">
+      <div class="lg:hidden flex items-center gap-2 mb-8">
+        <div class="w-10 h-10 gradient-brand rounded-xl flex items-center justify-center text-white">
+          <i data-lucide="sparkles" class="w-6 h-6"></i>
+        </div>
+        <span class="font-display font-bold text-xl">Nexora HR</span>
+      </div>
+      <h2 class="font-display text-2xl font-bold mb-1">Welcome back</h2>
+      <p class="text-gray-500 mb-8 text-sm">Sign in to access your dashboard</p>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="text-sm font-medium text-gray-700">Email</label>
+          <input id="login-email" type="email" value="admin@nexorahr.com" class="w-full mt-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" required>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Password</label>
+          <input id="login-password" type="password" value="password123" class="w-full mt-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" required>
+        </div>
+        <p id="login-error" class="text-red-500 text-sm hidden">Invalid email or password.</p>
+        <button type="submit" class="w-full gradient-brand text-white font-semibold py-2.5 rounded-xl hover:opacity-90 transition">Sign In</button>
+      </form>
+      <p class="text-xs text-gray-400 mt-6">Demo credentials: admin@nexorahr.com / password123</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="app-shell" class="hidden min-h-screen">
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 min-h-screen gradient-brand text-white flex flex-col fixed">
+      <div class="flex items-center gap-2 px-6 py-6">
+        <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <span class="font-display font-bold text-lg">Nexora HR</span>
+      </div>
+      <nav class="flex-1 px-3 space-y-1 mt-4" id="sidebar-nav">
+        <a data-route="dashboard" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-white/10 transition"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></a>
+        <a data-route="employees" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-white/10 transition"><i data-lucide="users" class="w-4 h-4"></i><span>Employees</span></a>
+        <a data-route="departments" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-white/10 transition"><i data-lucide="building-2" class="w-4 h-4"></i><span>Departments</span></a>
+        <a data-route="positions" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-white/10 transition"><i data-lucide="briefcase" class="w-4 h-4"></i><span>Positions</span></a>
+        <a data-route="attendance" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-white/10 transition"><i data-lucide="calendar-check" class="w-4 h-4"></i><span>Attendance</span></a>
+        <a data-route="leaves" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-white/10 transition"><i data-lucide="calendar-off" class="w-4 h-4"></i><span>Leaves</span></a>
+        <a data-route="payroll" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-white/10 transition"><i data-lucide="wallet" class="w-4 h-4"></i><span>Payroll</span></a>
+      </nav>
+      <div class="p-3">
+        <button id="logout-btn" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10 transition text-sm">
+          <i data-lucide="log-out" class="w-4 h-4"></i><span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="ml-64 flex-1 min-h-screen">
+      <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
+        <h1 id="page-title" class="font-display text-xl font-bold">Dashboard</h1>
+        <div class="flex items-center gap-3">
+          <img src="https://api.dicebear.com/7.x/initials/svg?seed=Admin&backgroundColor=6D28D9" class="w-9 h-9 rounded-full" alt="avatar">
+          <div class="text-sm">
+            <div class="font-semibold">Admin User</div>
+            <div class="text-gray-400 text-xs">Administrator</div>
+          </div>
+        </div>
+      </header>
+      <main id="content" class="p-8"></main>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL ROOT ===================== -->
+<div id="modal-root"></div>
+
+<script>
+/* =========================================================
+   STATE & CONSTANTS
+========================================================= */
+const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/initials/svg?backgroundColor=6D28D9';
+const STATUS_COLORS = {
+  'Active': 'bg-green-100 text-green-700',
+  'Inactive': 'bg-gray-100 text-gray-600',
+  'OnLeave': 'bg-orange-100 text-orange-700',
+  'Present': 'bg-green-100 text-green-700',
+  'Absent': 'bg-red-100 text-red-700',
+  'Late': 'bg-yellow-100 text-yellow-700',
+  'HalfDay': 'bg-blue-100 text-blue-700',
+  'Pending': 'bg-yellow-100 text-yellow-700',
+  'Approved': 'bg-green-100 text-green-700',
+  'Rejected': 'bg-red-100 text-red-700',
+  'Paid': 'bg-green-100 text-green-700'
+};
+const POSITION_COLORS = ['bg-violet-100 text-violet-700','bg-pink-100 text-pink-700','bg-cyan-100 text-cyan-700','bg-orange-100 text-orange-700','bg-blue-100 text-blue-700','bg-emerald-100 text-emerald-700'];
+let charts = {};
+let cache = { employees: [], departments: [], positions: [], attendance: [], leaves: [], payroll: [] };
+
+function icons() { lucide.createIcons(); }
+
+/* =========================================================
+   API HELPERS
+========================================================= */
+async function apiGet(path) {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+  return res.json();
+}
+async function apiSend(path, method, body) {
+  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+  return res.json();
+}
+const apiPost = (p, b) => apiSend(p, 'POST', b);
+const apiPut = (p, b) => apiSend(p, 'PUT', b);
+async function apiDelete(path) {
+  const res = await fetch(path, { method: 'DELETE' });
+  if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+  return res.json();
+}
+
+function statusPill(status) {
+  const cls = STATUS_COLORS[status] || 'bg-gray-100 text-gray-600';
+  return `<span class="pill ${cls}">${status || 'N/A'}</span>`;
+}
+function positionPill(title, idx) {
+  const cls = POSITION_COLORS[idx % POSITION_COLORS.length];
+  return `<span class="pill ${cls}">${title || 'Unassigned'}</span>`;
+}
+function fmtMoney(n) { return '$' + Number(n || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString() : ''; }
+
+/* =========================================================
+   AUTH / LOGIN
+========================================================= */
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  try {
+    const data = await apiPost('/api/login', { email, password });
+    localStorage.setItem('nexorahr_token', data.token);
+    localStorage.setItem('nexorahr_user', JSON.stringify(data.user));
+    errEl.classList.add('hidden');
+    boot();
+  } catch (err) {
+    errEl.textContent = err.message || 'Invalid email or password.';
+    errEl.classList.remove('hidden');
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('nexorahr_token');
+  localStorage.removeItem('nexorahr_user');
+  location.reload();
+});
+
+function boot() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app-shell').classList.remove('hidden');
+  icons();
+  navigate('dashboard');
+}
+
+(function initAuth() {
+  if (localStorage.getItem('nexorahr_token')) boot();
+  else icons();
+})();
+
+/* =========================================================
+   ROUTING
+========================================================= */
+document.getElementById('sidebar-nav').addEventListener('click', (e) => {
+  const link = e.target.closest('[data-route]');
+  if (link) navigate(link.dataset.route);
+});
+
+const TITLES = {
+  dashboard: 'Dashboard', employees: 'Employees', departments: 'Departments',
+  positions: 'Positions', attendance: 'Attendance', leaves: 'Leaves', payroll: 'Payroll'
+};
+
+async function navigate(route) {
+  document.querySelectorAll('.nav-link').forEach(el => el.classList.toggle('active', el.dataset.route === route));
+  document.getElementById('page-title').textContent = TITLES[route] || 'Dashboard';
+  const content = document.getElementById('content');
+  content.innerHTML = `<div class="flex items-center justify-center py-24 text-gray-400"><i data-lucide="loader" class="w-6 h-6 animate-spin"></i></div>`;
+  icons();
+  try {
+    if (route === 'dashboard') await renderDashboard();
+    else if (route === 'employees') await renderEmployees();
+    else if (route === 'departments') await renderDepartments();
+    else if (route === 'positions') await renderPositions();
+    else if (route === 'attendance') await renderAttendance();
+    else if (route === 'leaves') await renderLeaves();
+    else if (route === 'payroll') await renderPayroll();
+  } catch (err) {
+    content.innerHTML = `<div class="bg-red-50 text-red-600 p-4 rounded-xl">${err.message}</div>`;
+  }
+}
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+async function renderDashboard() {
+  const stats = await apiGet('/api/dashboard/stats');
+  const c = stats.cards;
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      ${statCard('Total Employees', c.total_employees, 'users', 'from-blue-500 to-blue-600')}
+      ${statCard('Departments', c.total_departments, 'building-2', 'from-emerald-500 to-emerald-600')}
+      ${statCard('Present Today', c.present_today, 'calendar-check', 'from-orange-400 to-orange-500')}
+      ${statCard('Pending Leaves', c.pending_leaves, 'calendar-off', 'from-pink-500 to-pink-600')}
+      ${statCard('Monthly Payroll', fmtMoney(c.monthly_payroll), 'wallet', 'from-cyan-500 to-cyan-600')}
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-2xl p-5 shadow-sm lg:col-span-1">
+        <h3 class="font-display font-semibold mb-4">Hiring Trend</h3>
+        <canvas id="chart-hiring" height="200"></canvas>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm lg:col-span-1">
+        <h3 class="font-display font-semibold mb-4">Department Mix</h3>
+        <canvas id="chart-dept" height="200"></canvas>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm lg:col-span-1">
+        <h3 class="font-display font-semibold mb-4">Employees by Position</h3>
+        <div class="space-y-3 max-h-64 overflow-y-auto scrollbar-thin pr-2">
+          ${stats.employees_by_position.map((e,i) => `
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <img src="${e.profile_pic || DEFAULT_AVATAR + '&seed=' + encodeURIComponent(e.name)}" class="w-8 h-8 rounded-full object-cover">
+                <span class="text-sm font-medium">${e.name}</span>
+              </div>
+              ${positionPill(e.position_title, i)}
+            </div>
+          `).join('') || '<p class="text-gray-400 text-sm">No employees yet.</p>'}
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <h3 class="font-display font-semibold mb-4">Attendance Trend</h3>
+        <canvas id="chart-attendance" height="180"></canvas>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <h3 class="font-display font-semibold mb-4">Status Breakdown</h3>
+        <canvas id="chart-status" height="180"></canvas>
+      </div>
+    </div>
+  `;
+  icons();
+
+  Object.values(charts).forEach(ch => ch && ch.destroy());
+
+  charts.hiring = new Chart(document.getElementById('chart-hiring'), {
+    type: 'bar',
+    data: { labels: stats.hiring_trend.labels, datasets: [{ label: 'Hires', data: stats.hiring_trend.data, backgroundColor: '#7C3AED', borderRadius: 6 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  charts.dept = new Chart(document.getElementById('chart-dept'), {
+    type: 'doughnut',
+    data: {
+      labels: stats.department_mix.labels,
+      datasets: [{ data: stats.department_mix.data, backgroundColor: ['#7C3AED','#F97316','#06B6D4','#EC4899','#10B981','#F59E0B','#3B82F6'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } }
+  });
+
+  charts.attendance = new Chart(document.getElementById('chart-attendance'), {
+    type: 'line',
+    data: { labels: stats.attendance_trend.labels, datasets: [{ label: 'Present', data: stats.attendance_trend.data, borderColor: '#4F46E5', backgroundColor: 'rgba(124,58,237,0.15)', fill: true, tension: 0.4 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  charts.status = new Chart(document.getElementById('chart-status'), {
+    type: 'doughnut',
+    data: {
+      labels: stats.status_breakdown.labels,
+      datasets: [{ data: stats.status_breakdown.data, backgroundColor: ['#10B981','#F97316','#EF4444','#3B82F6','#EC4899'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } } }
+  });
+}
+
+function statCard(label, value, icon, gradient) {
+  return `
+    <div class="rounded-2xl p-5 text-white shadow-sm bg-gradient-to-br ${gradient}">
+      <div class="flex items-center justify-between mb-4">
+        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><i data-lucide="${icon}" class="w-5 h-5"></i></div>
+      </div>
+      <div class="text-2xl font-display font-bold">${value}</div>
+      <div class="text-white/80 text-sm">${label}</div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   IMAGE RESIZE HELPER (Canvas -> Base64, max 200x200)
+========================================================= */
+function resizeImageToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 200;
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxDim) { height *= maxDim / width; width = maxDim; }
+        } else {
+          if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* =========================================================
+   MODAL HELPERS
+========================================================= */
+function openModal(html) {
+  document.getElementById('modal-root').innerHTML = `
+    <div class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 p-4" id="modal-overlay">
+      <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin shadow-xl">
+        ${html}
+      </div>
+    </div>`;
+  icons();
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') closeModal();
+  });
+}
+function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
+
+function modalHeader(title) {
+  return `
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h3 class="font-display font-bold text-lg">${title}</h3>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>`;
+}
+
+/* =========================================================
+   EMPLOYEES
+========================================================= */
+async function renderEmployees() {
+  const [employees, departments, positions] = await Promise.all([
+    apiGet('/api/employees'), apiGet('/api/departments'), apiGet('/api/positions')
+  ]);
+  cache.employees = employees; cache.departments = departments; cache.positions = positions;
+
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm">
+      <div class="p-5 flex flex-wrap gap-3 items-center justify-between border-b border-gray-100">
+        <div class="flex flex-wrap gap-3">
+          <input id="emp-search" placeholder="Search employees..." class="px-4 py-2 border border-gray-300 rounded-xl text-sm w-56 outline-none focus:ring-2 focus:ring-brand-500">
+          <select id="emp-filter-dept" class="px-3 py-2 border border-gray-300 rounded-xl text-sm outline-none">
+            <option value="">All Departments</option>
+            ${departments.map(d => `<option value="${d.id}">${d.name}</option>`).join('')}
+          </select>
+          <select id="emp-filter-status" class="px-3 py-2 border border-gray-300 rounded-xl text-sm outline-none">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="OnLeave">On Leave</option>
+          </select>
+        </div>
+        <button onclick="openEmployeeModal()" class="gradient-brand text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Add Employee</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left border-b border-gray-100">
+            <th class="px-5 py-3">Employee</th><th class="px-5 py-3">Department</th><th class="px-5 py-3">Position</th><th class="px-5 py-3">Salary</th><th class="px-5 py-3">Status</th><th class="px-5 py-3 text-right">Actions</th>
+          </tr></thead>
+          <tbody id="employees-tbody"></tbody>
+        </table>
+      </div>
+    </div>`;
+  icons();
+
+  function draw() {
+    const q = document.getElementById('emp-search').value.toLowerCase();
+    const dept = document.getElementById('emp-filter-dept').value;
+    const status = document.getElementById('emp-filter-status').value;
+    const rows = cache.employees.filter(e =>
+      (!q || e.name.toLowerCase().includes(q) || (e.email || '').toLowerCase().includes(q)) &&
+      (!dept || String(e.department_id) === dept) &&
+      (!status || e.status === status)
+    );
+    document.getElementById('employees-tbody').innerHTML = rows.map(e => `
+      <tr class="border-b border-gray-50 hover:bg-gray-50">
+        <td class="px-5 py-3 flex items-center gap-3">
+          <img src="${e.profile_pic || DEFAULT_AVATAR + '&seed=' + encodeURIComponent(e.name)}" class="w-9 h-9 rounded-full object-cover">
+          <div><div class="font-medium">${e.name}</div><div class="text-gray-400 text-xs">${e.email}</div></div>
+        </td>
+        <td class="px-5 py-3">${e.department_name || '-'}</td>
+        <td class="px-5 py-3">${e.position_title || '-'}</td>
+        <td class="px-5 py-3">${fmtMoney(e.salary)}</td>
+        <td class="px-5 py-3">${statusPill(e.status)}</td>
+        <td class="px-5 py-3 text-right space-x-2">
+          <button onclick='openEmployeeModal(${JSON.stringify(e).replace(/'/g,"&apos;")})' class="text-brand-600 hover:text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deleteEmployee(${e.id})" class="text-red-500 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="6" class="px-5 py-10 text-center text-gray-400">No employees found.</td></tr>`;
+    icons();
+  }
+  ['emp-search','emp-filter-dept','emp-filter-status'].forEach(id => document.getElementById(id).addEventListener('input', draw));
+  draw();
+}
+
+function openEmployeeModal(emp) {
+  emp = emp || {};
+  const depts = cache.departments, positions = cache.positions;
+  openModal(`
+    ${modalHeader(emp.id ? 'Edit Employee' : 'Add Employee')}
+    <form id="employee-form" class="p-6 space-y-4">
+      <div class="flex items-center gap-4">
+        <img id="emp-pic-preview" src="${emp.profile_pic || DEFAULT_AVATAR}" class="w-16 h-16 rounded-full object-cover border">
+        <div>
+          <label class="text-sm font-medium text-gray-700 block mb-1">Profile Picture</label>
+          <input id="emp-pic-input" type="file" accept="image/*" class="text-sm">
+        </div>
+      </div>
+      <div><label class="text-sm font-medium text-gray-700">Name</label>
+        <input id="emp-name" value="${emp.name || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" required></div>
+      <div><label class="text-sm font-medium text-gray-700">Email</label>
+        <input id="emp-email" type="email" value="${emp.email || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-brand-500" required></div>
+      <div><label class="text-sm font-medium text-gray-700">Phone</label>
+        <input id="emp-phone" value="${emp.phone || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-brand-500"></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm font-medium text-gray-700">Department</label>
+          <select id="emp-dept" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+            <option value="">-- Select --</option>
+            ${depts.map(d => `<option value="${d.id}" ${emp.department_id===d.id?'selected':''}>${d.name}</option>`).join('')}
+          </select></div>
+        <div><label class="text-sm font-medium text-gray-700">Position</label>
+          <select id="emp-position" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+            <option value="">-- Select --</option>
+            ${positions.map(p => `<option value="${p.id}" ${emp.position_id===p.id?'selected':''}>${p.title}</option>`).join('')}
+          </select></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm font-medium text-gray-700">Salary</label>
+          <input id="emp-salary" type="number" step="0.01" value="${emp.salary || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none"></div>
+        <div><label class="text-sm font-medium text-gray-700">Status</label>
+          <select id="emp-status" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+            <option ${emp.status==='Active'?'selected':''}>Active</option>
+            <option ${emp.status==='Inactive'?'selected':''}>Inactive</option>
+            <option ${emp.status==='OnLeave'?'selected':''}>OnLeave</option>
+          </select></div>
+      </div>
+      <div><label class="text-sm font-medium text-gray-700">Hire Date</label>
+        <input id="emp-hire-date" type="date" value="${emp.hire_date || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none"></div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold">Save Employee</button>
+      </div>
+    </form>
+  `);
+
+  let base64Pic = emp.profile_pic || null;
+  document.getElementById('emp-pic-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    base64Pic = await resizeImageToBase64(file);
+    document.getElementById('emp-pic-preview').src = base64Pic;
+  });
+
+  document.getElementById('employee-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: document.getElementById('emp-name').value,
+      email: document.getElementById('emp-email').value,
+      phone: document.getElementById('emp-phone').value,
+      department_id: document.getElementById('emp-dept').value ? Number(document.getElementById('emp-dept').value) : null,
+      position_id: document.getElementById('emp-position').value ? Number(document.getElementById('emp-position').value) : null,
+      salary: Number(document.getElementById('emp-salary').value || 0),
+      status: document.getElementById('emp-status').value,
+      hire_date: document.getElementById('emp-hire-date').value || null,
+      profile_pic: base64Pic || DEFAULT_AVATAR + '&seed=' + encodeURIComponent(document.getElementById('emp-name').value)
+    };
+    try {
+      if (emp.id) await apiPut(`/api/employees/${emp.id}`, payload);
+      else await apiPost('/api/employees', payload);
+      closeModal();
+      navigate('employees');
+    } catch (err) { alert(err.message); }
+  });
+}
+
+async function deleteEmployee(id) {
+  if (!confirm('Delete this employee?')) return;
+  await apiDelete(`/api/employees/${id}`);
+  navigate('employees');
+}
+
+/* =========================================================
+   DEPARTMENTS
+========================================================= */
+async function renderDepartments() {
+  const departments = await apiGet('/api/departments');
+  cache.departments = departments;
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm">
+      <div class="p-5 flex flex-wrap gap-3 items-center justify-between border-b border-gray-100">
+        <input id="dept-search" placeholder="Search departments..." class="px-4 py-2 border border-gray-300 rounded-xl text-sm w-64 outline-none focus:ring-2 focus:ring-brand-500">
+        <button onclick="openDepartmentModal()" class="gradient-brand text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Add Department</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left border-b border-gray-100"><th class="px-5 py-3">Name</th><th class="px-5 py-3">Description</th><th class="px-5 py-3 text-right">Actions</th></tr></thead>
+          <tbody id="departments-tbody"></tbody>
+        </table>
+      </div>
+    </div>`;
+  icons();
+  function draw() {
+    const q = document.getElementById('dept-search').value.toLowerCase();
+    const rows = departments.filter(d => !q || d.name.toLowerCase().includes(q));
+    document.getElementById('departments-tbody').innerHTML = rows.map(d => `
+      <tr class="border-b border-gray-50 hover:bg-gray-50">
+        <td class="px-5 py-3 font-medium">${d.name}</td>
+        <td class="px-5 py-3 text-gray-500">${d.description || '-'}</td>
+        <td class="px-5 py-3 text-right space-x-2">
+          <button onclick='openDepartmentModal(${JSON.stringify(d).replace(/'/g,"&apos;")})' class="text-brand-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deleteDepartment(${d.id})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="3" class="px-5 py-10 text-center text-gray-400">No departments found.</td></tr>`;
+    icons();
+  }
+  document.getElementById('dept-search').addEventListener('input', draw);
+  draw();
+}
+
+function openDepartmentModal(d) {
+  d = d || {};
+  openModal(`
+    ${modalHeader(d.id ? 'Edit Department' : 'Add Department')}
+    <form id="dept-form" class="p-6 space-y-4">
+      <div><label class="text-sm font-medium text-gray-700">Name</label>
+        <input id="dept-name" value="${d.name || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required></div>
+      <div><label class="text-sm font-medium text-gray-700">Description</label>
+        <textarea id="dept-desc" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">${d.description || ''}</textarea></div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold">Save</button>
+      </div>
+    </form>
+  `);
+  document.getElementById('dept-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = { name: document.getElementById('dept-name').value, description: document.getElementById('dept-desc').value };
+    try {
+      if (d.id) await apiPut(`/api/departments/${d.id}`, payload);
+      else await apiPost('/api/departments', payload);
+      closeModal(); navigate('departments');
+    } catch (err) { alert(err.message); }
+  });
+}
+async function deleteDepartment(id) {
+  if (!confirm('Delete this department?')) return;
+  await apiDelete(`/api/departments/${id}`);
+  navigate('departments');
+}
+
+/* =========================================================
+   POSITIONS
+========================================================= */
+async function renderPositions() {
+  const [positions, departments, employees] = await Promise.all([apiGet('/api/positions'), apiGet('/api/departments'), apiGet('/api/employees')]);
+  cache.positions = positions; cache.departments = departments; cache.employees = employees;
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm">
+      <div class="p-5 flex flex-wrap gap-3 items-center justify-between border-b border-gray-100">
+        <div class="flex gap-3">
+          <input id="pos-search" placeholder="Search positions..." class="px-4 py-2 border border-gray-300 rounded-xl text-sm w-56 outline-none">
+          <select id="pos-filter-dept" class="px-3 py-2 border border-gray-300 rounded-xl text-sm outline-none">
+            <option value="">All Departments</option>
+            ${departments.map(d => `<option value="${d.id}">${d.name}</option>`).join('')}
+          </select>
+        </div>
+        <button onclick="openPositionModal()" class="gradient-brand text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Add Position</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left border-b border-gray-100"><th class="px-5 py-3">Title</th><th class="px-5 py-3">Department</th><th class="px-5 py-3">Assigned Employees</th><th class="px-5 py-3 text-right">Actions</th></tr></thead>
+          <tbody id="positions-tbody"></tbody>
+        </table>
+      </div>
+    </div>`;
+  icons();
+  function draw() {
+    const q = document.getElementById('pos-search').value.toLowerCase();
+    const dept = document.getElementById('pos-filter-dept').value;
+    const rows = positions.filter(p => (!q || p.title.toLowerCase().includes(q)) && (!dept || String(p.department_id) === dept));
+    document.getElementById('positions-tbody').innerHTML = rows.map(p => `
+      <tr class="border-b border-gray-50 hover:bg-gray-50 align-top">
+        <td class="px-5 py-3 font-medium">${p.title}</td>
+        <td class="px-5 py-3">${p.department_name || '-'}</td>
+        <td class="px-5 py-3">
+          <div class="flex flex-wrap gap-2 items-center">
+            ${(p.assigned_employees||[]).map(e => `
+              <span class="flex items-center gap-1 bg-violet-50 rounded-full pl-1 pr-2 py-0.5 text-xs">
+                <img src="${e.profile_pic || DEFAULT_AVATAR + '&seed=' + encodeURIComponent(e.name)}" class="w-5 h-5 rounded-full object-cover">
+                ${e.name}
+              </span>`).join('') || '<span class="text-gray-400 text-xs">No employees assigned</span>'}
+            <button onclick="openAssignModal(${p.id})" class="text-brand-600 text-xs font-semibold flex items-center gap-1 hover:underline"><i data-lucide="user-plus" class="w-3 h-3"></i>Assign</button>
+          </div>
+        </td>
+        <td class="px-5 py-3 text-right space-x-2">
+          <button onclick='openPositionModal(${JSON.stringify(p).replace(/'/g,"&apos;")})' class="text-brand-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deletePosition(${p.id})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="4" class="px-5 py-10 text-center text-gray-400">No positions found.</td></tr>`;
+    icons();
+  }
+  ['pos-search','pos-filter-dept'].forEach(id => document.getElementById(id).addEventListener('input', draw));
+  draw();
+}
+
+function openPositionModal(p) {
+  p = p || {};
+  const depts = cache.departments;
+  openModal(`
+    ${modalHeader(p.id ? 'Edit Position' : 'Add Position')}
+    <form id="pos-form" class="p-6 space-y-4">
+      <div><label class="text-sm font-medium text-gray-700">Title</label>
+        <input id="pos-title" value="${p.title || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required></div>
+      <div><label class="text-sm font-medium text-gray-700">Department</label>
+        <select id="pos-dept" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+          <option value="">-- Select --</option>
+          ${depts.map(d => `<option value="${d.id}" ${p.department_id===d.id?'selected':''}>${d.name}</option>`).join('')}
+        </select></div>
+      <div><label class="text-sm font-medium text-gray-700">Description</label>
+        <textarea id="pos-desc" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">${p.description || ''}</textarea></div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold">Save</button>
+      </div>
+    </form>
+  `);
+  document.getElementById('pos-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      title: document.getElementById('pos-title').value,
+      department_id: document.getElementById('pos-dept').value ? Number(document.getElementById('pos-dept').value) : null,
+      description: document.getElementById('pos-desc').value
+    };
+    try {
+      if (p.id) await apiPut(`/api/positions/${p.id}`, payload);
+      else await apiPost('/api/positions', payload);
+      closeModal(); navigate('positions');
+    } catch (err) { alert(err.message); }
+  });
+}
+async function deletePosition(id) {
+  if (!confirm('Delete this position?')) return;
+  await apiDelete(`/api/positions/${id}`);
+  navigate('positions');
+}
+function openAssignModal(positionId) {
+  const employees = cache.employees;
+  openModal(`
+    ${modalHeader('Assign Employee')}
+    <form id="assign-form" class="p-6 space-y-4">
+      <div><label class="text-sm font-medium text-gray-700">Select Employee</label>
+        <select id="assign-employee" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required>
+          <option value="">-- Select employee --</option>
+          ${employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}
+        </select></div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold">Assign</button>
+      </div>
+    </form>
+  `);
+  document.getElementById('assign-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const employeeId = document.getElementById('assign-employee').value;
+    if (!employeeId) return;
+    try {
+      await apiPost(`/api/positions/${positionId}/assign`, { employee_id: Number(employeeId) });
+      closeModal(); navigate('positions');
+    } catch (err) { alert(err.message); }
+  });
+}
+
+/* =========================================================
+   ATTENDANCE
+========================================================= */
+async function renderAttendance() {
+  const [attendance, employees] = await Promise.all([apiGet('/api/attendance'), apiGet('/api/employees')]);
+  cache.attendance = attendance; cache.employees = employees;
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm">
+      <div class="p-5 flex flex-wrap gap-3 items-center justify-between border-b border-gray-100">
+        <div class="flex flex-wrap gap-3">
+          <input id="att-search" placeholder="Search employee..." class="px-4 py-2 border border-gray-300 rounded-xl text-sm w-52 outline-none">
+          <select id="att-filter-status" class="px-3 py-2 border border-gray-300 rounded-xl text-sm outline-none">
+            <option value="">All Status</option>
+            <option>Present</option><option>Absent</option><option>Late</option><option>HalfDay</option>
+          </select>
+          <input id="att-filter-date" type="date" class="px-3 py-2 border border-gray-300 rounded-xl text-sm outline-none">
+        </div>
+        <button onclick="openAttendanceModal()" class="gradient-brand text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Add Record</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left border-b border-gray-100"><th class="px-5 py-3">Employee</th><th class="px-5 py-3">Date</th><th class="px-5 py-3">Check In</th><th class="px-5 py-3">Check Out</th><th class="px-5 py-3">Status</th><th class="px-5 py-3 text-right">Actions</th></tr></thead>
+          <tbody id="attendance-tbody"></tbody>
+        </table>
+      </div>
+    </div>`;
+  icons();
+  function draw() {
+    const q = document.getElementById('att-search').value.toLowerCase();
+    const status = document.getElementById('att-filter-status').value;
+    const dt = document.getElementById('att-filter-date').value;
+    const rows = attendance.filter(a =>
+      (!q || (a.employee_name||'').toLowerCase().includes(q)) &&
+      (!status || a.status === status) &&
+      (!dt || a.date === dt)
+    );
+    document.getElementById('attendance-tbody').innerHTML = rows.map(a => `
+      <tr class="border-b border-gray-50 hover:bg-gray-50">
+        <td class="px-5 py-3 flex items-center gap-2">
+          <img src="${a.employee_pic || DEFAULT_AVATAR + '&seed=' + encodeURIComponent(a.employee_name||'?')}" class="w-7 h-7 rounded-full object-cover">
+          ${a.employee_name || '-'}</td>
+        <td class="px-5 py-3">${fmtDate(a.date)}</td>
+        <td class="px-5 py-3">${a.check_in || '-'}</td>
+        <td class="px-5 py-3">${a.check_out || '-'}</td>
+        <td class="px-5 py-3">${statusPill(a.status)}</td>
+        <td class="px-5 py-3 text-right space-x-2">
+          <button onclick='openAttendanceModal(${JSON.stringify(a).replace(/'/g,"&apos;")})' class="text-brand-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deleteAttendance(${a.id})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="6" class="px-5 py-10 text-center text-gray-400">No attendance records.</td></tr>`;
+    icons();
+  }
+  ['att-search','att-filter-status','att-filter-date'].forEach(id => document.getElementById(id).addEventListener('input', draw));
+  draw();
+}
+
+function openAttendanceModal(a) {
+  a = a || {};
+  const employees = cache.employees;
+  openModal(`
+    ${modalHeader(a.id ? 'Edit Attendance' : 'Add Attendance')}
+    <form id="att-form" class="p-6 space-y-4">
+      <div><label class="text-sm font-medium text-gray-700">Employee</label>
+        <select id="att-employee" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required>
+          <option value="">-- Select --</option>
+          ${employees.map(e => `<option value="${e.id}" ${a.employee_id===e.id?'selected':''}>${e.name}</option>`).join('')}
+        </select></div>
+      <div><label class="text-sm font-medium text-gray-700">Date</label>
+        <input id="att-date" type="date" value="${a.date || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm font-medium text-gray-700">Check In</label>
+          <input id="att-checkin" type="time" value="${a.check_in || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none"></div>
+        <div><label class="text-sm font-medium text-gray-700">Check Out</label>
+          <input id="att-checkout" type="time" value="${a.check_out || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none"></div>
+      </div>
+      <div><label class="text-sm font-medium text-gray-700">Status</label>
+        <select id="att-status" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+          <option ${a.status==='Present'?'selected':''}>Present</option>
+          <option ${a.status==='Absent'?'selected':''}>Absent</option>
+          <option ${a.status==='Late'?'selected':''}>Late</option>
+          <option ${a.status==='HalfDay'?'selected':''}>HalfDay</option>
+        </select></div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold">Save</button>
+      </div>
+    </form>
+  `);
+  document.getElementById('att-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      employee_id: Number(document.getElementById('att-employee').value),
+      date: document.getElementById('att-date').value,
+      check_in: document.getElementById('att-checkin').value || null,
+      check_out: document.getElementById('att-checkout').value || null,
+      status: document.getElementById('att-status').value
+    };
+    try {
+      if (a.id) await apiPut(`/api/attendance/${a.id}`, payload);
+      else await apiPost('/api/attendance', payload);
+      closeModal(); navigate('attendance');
+    } catch (err) { alert(err.message); }
+  });
+}
+async function deleteAttendance(id) {
+  if (!confirm('Delete this record?')) return;
+  await apiDelete(`/api/attendance/${id}`);
+  navigate('attendance');
+}
+
+/* =========================================================
+   LEAVES
+========================================================= */
+async function renderLeaves() {
+  const [leaves, employees] = await Promise.all([apiGet('/api/leaves'), apiGet('/api/employees')]);
+  cache.leaves = leaves; cache.employees = employees;
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm">
+      <div class="p-5 flex flex-wrap gap-3 items-center justify-between border-b border-gray-100">
+        <div class="flex flex-wrap gap-3">
+          <input id="leave-search" placeholder="Search employee..." class="px-4 py-2 border border-gray-300 rounded-xl text-sm w-52 outline-none">
+          <select id="leave-filter-status" class="px-3 py-2 border border-gray-300 rounded-xl text-sm outline-none">
+            <option value="">All Status</option>
+            <option>Pending</option><option>Approved</option><option>Rejected</option>
+          </select>
+        </div>
+        <button onclick="openLeaveModal()" class="gradient-brand text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Add Leave</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left border-b border-gray-100"><th class="px-5 py-3">Employee</th><th class="px-5 py-3">Type</th><th class="px-5 py-3">Start</th><th class="px-5 py-3">End</th><th class="px-5 py-3">Status</th><th class="px-5 py-3 text-right">Actions</th></tr></thead>
+          <tbody id="leaves-tbody"></tbody>
+        </table>
+      </div>
+    </div>`;
+  icons();
+  function draw() {
+    const q = document.getElementById('leave-search').value.toLowerCase();
+    const status = document.getElementById('leave-filter-status').value;
+    const rows = leaves.filter(l => (!q || (l.employee_name||'').toLowerCase().includes(q)) && (!status || l.status === status));
+    document.getElementById('leaves-tbody').innerHTML = rows.map(l => `
+      <tr class="border-b border-gray-50 hover:bg-gray-50">
+        <td class="px-5 py-3 flex items-center gap-2">
+          <img src="${l.employee_pic || DEFAULT_AVATAR + '&seed=' + encodeURIComponent(l.employee_name||'?')}" class="w-7 h-7 rounded-full object-cover">
+          ${l.employee_name || '-'}</td>
+        <td class="px-5 py-3">${l.leave_type}</td>
+        <td class="px-5 py-3">${fmtDate(l.start_date)}</td>
+        <td class="px-5 py-3">${fmtDate(l.end_date)}</td>
+        <td class="px-5 py-3">${statusPill(l.status)}</td>
+        <td class="px-5 py-3 text-right space-x-2">
+          <button onclick='openLeaveModal(${JSON.stringify(l).replace(/'/g,"&apos;")})' class="text-brand-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deleteLeave(${l.id})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="6" class="px-5 py-10 text-center text-gray-400">No leave requests.</td></tr>`;
+    icons();
+  }
+  ['leave-search','leave-filter-status'].forEach(id => document.getElementById(id).addEventListener('input', draw));
+  draw();
+}
+
+function openLeaveModal(l) {
+  l = l || {};
+  const employees = cache.employees;
+  openModal(`
+    ${modalHeader(l.id ? 'Edit Leave' : 'Add Leave')}
+    <form id="leave-form" class="p-6 space-y-4">
+      <div><label class="text-sm font-medium text-gray-700">Employee</label>
+        <select id="leave-employee" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required>
+          <option value="">-- Select --</option>
+          ${employees.map(e => `<option value="${e.id}" ${l.employee_id===e.id?'selected':''}>${e.name}</option>`).join('')}
+        </select></div>
+      <div><label class="text-sm font-medium text-gray-700">Leave Type</label>
+        <select id="leave-type" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+          <option ${l.leave_type==='Casual'?'selected':''}>Casual</option>
+          <option ${l.leave_type==='Sick'?'selected':''}>Sick</option>
+          <option ${l.leave_type==='Earned'?'selected':''}>Earned</option>
+          <option ${l.leave_type==='Unpaid'?'selected':''}>Unpaid</option>
+        </select></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-sm font-medium text-gray-700">Start Date</label>
+          <input id="leave-start" type="date" value="${l.start_date || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required></div>
+        <div><label class="text-sm font-medium text-gray-700">End Date</label>
+          <input id="leave-end" type="date" value="${l.end_date || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required></div>
+      </div>
+      <div><label class="text-sm font-medium text-gray-700">Reason</label>
+        <textarea id="leave-reason" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">${l.reason || ''}</textarea></div>
+      <div><label class="text-sm font-medium text-gray-700">Status</label>
+        <select id="leave-status" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+          <option ${l.status==='Pending'?'selected':''}>Pending</option>
+          <option ${l.status==='Approved'?'selected':''}>Approved</option>
+          <option ${l.status==='Rejected'?'selected':''}>Rejected</option>
+        </select></div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold">Save</button>
+      </div>
+    </form>
+  `);
+  document.getElementById('leave-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      employee_id: Number(document.getElementById('leave-employee').value),
+      leave_type: document.getElementById('leave-type').value,
+      start_date: document.getElementById('leave-start').value,
+      end_date: document.getElementById('leave-end').value,
+      reason: document.getElementById('leave-reason').value,
+      status: document.getElementById('leave-status').value
+    };
+    try {
+      if (l.id) await apiPut(`/api/leaves/${l.id}`, payload);
+      else await apiPost('/api/leaves', payload);
+      closeModal(); navigate('leaves');
+    } catch (err) { alert(err.message); }
+  });
+}
+async function deleteLeave(id) {
+  if (!confirm('Delete this leave request?')) return;
+  await apiDelete(`/api/leaves/${id}`);
+  navigate('leaves');
+}
+
+/* =========================================================
+   PAYROLL
+========================================================= */
+async function renderPayroll() {
+  const [payroll, employees] = await Promise.all([apiGet('/api/payroll'), apiGet('/api/employees')]);
+  cache.payroll = payroll; cache.employees = employees;
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm">
+      <div class="p-5 flex flex-wrap gap-3 items-center justify-between border-b border-gray-100">
+        <div class="flex flex-wrap gap-3">
+          <input id="pay-search" placeholder="Search employee..." class="px-4 py-2 border border-gray-300 rounded-xl text-sm w-52 outline-none">
+          <select id="pay-filter-status" class="px-3 py-2 border border-gray-300 rounded-xl text-sm outline-none">
+            <option value="">All Status</option>
+            <option>Paid</option><option>Pending</option>
+          </select>
+        </div>
+        <button onclick="openPayrollModal()" class="gradient-brand text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Generate Payroll</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left border-b border-gray-100"><th class="px-5 py-3">Employee</th><th class="px-5 py-3">Month</th><th class="px-5 py-3">Basic</th><th class="px-5 py-3">Bonus</th><th class="px-5 py-3">Deductions</th><th class="px-5 py-3">Net</th><th class="px-5 py-3">Status</th><th class="px-5 py-3 text-right">Actions</th></tr></thead>
+          <tbody id="payroll-tbody"></tbody>
+        </table>
+      </div>
+    </div>`;
+  icons();
+  function draw() {
+    const q = document.getElementById('pay-search').value.toLowerCase();
+    const status = document.getElementById('pay-filter-status').value;
+    const rows = payroll.filter(p => (!q || (p.employee_name||'').toLowerCase().includes(q)) && (!status || p.status === status));
+    document.getElementById('payroll-tbody').innerHTML = rows.map(p => `
+      <tr class="border-b border-gray-50 hover:bg-gray-50">
+        <td class="px-5 py-3 flex items-center gap-2">
+          <img src="${p.employee_pic || DEFAULT_AVATAR + '&seed=' + encodeURIComponent(p.employee_name||'?')}" class="w-7 h-7 rounded-full object-cover">
+          ${p.employee_name || '-'}</td>
+        <td class="px-5 py-3">${p.month}</td>
+        <td class="px-5 py-3">${fmtMoney(p.basic_salary)}</td>
+        <td class="px-5 py-3">${fmtMoney(p.bonus)}</td>
+        <td class="px-5 py-3">${fmtMoney(p.deductions)}</td>
+        <td class="px-5 py-3 font-semibold">${fmtMoney(p.net_salary)}</td>
+        <td class="px-5 py-3">${statusPill(p.status)}</td>
+        <td class="px-5 py-3 text-right space-x-2">
+          <button onclick='openPayrollModal(${JSON.stringify(p).replace(/'/g,"&apos;")})' class="text-brand-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button onclick="deletePayroll(${p.id})" class="text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="8" class="px-5 py-10 text-center text-gray-400">No payroll records.</td></tr>`;
+    icons();
+  }
+  ['pay-search','pay-filter-status'].forEach(id => document.getElementById(id).addEventListener('input', draw));
+  draw();
+}
+
+function openPayrollModal(p) {
+  p = p || {};
+  const employees = cache.employees;
+  openModal(`
+    ${modalHeader(p.id ? 'Edit Payroll' : 'Generate Payroll')}
+    <form id="pay-form" class="p-6 space-y-4">
+      <div><label class="text-sm font-medium text-gray-700">Employee</label>
+        <select id="pay-employee" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required>
+          <option value="">-- Select --</option>
+          ${employees.map(e => `<option value="${e.id}" data-salary="${e.salary}" ${p.employee_id===e.id?'selected':''}>${e.name}</option>`).join('')}
+        </select></div>
+      <div><label class="text-sm font-medium text-gray-700">Month</label>
+        <input id="pay-month" placeholder="e.g. 2026-07" value="${p.month || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required></div>
+      <div class="grid grid-cols-3 gap-3">
+        <div><label class="text-sm font-medium text-gray-700">Basic Salary</label>
+          <input id="pay-basic" type="number" step="0.01" value="${p.basic_salary || ''}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none" required></div>
+        <div><label class="text-sm font-medium text-gray-700">Bonus</label>
+          <input id="pay-bonus" type="number" step="0.01" value="${p.bonus || 0}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none"></div>
+        <div><label class="text-sm font-medium text-gray-700">Deductions</label>
+          <input id="pay-deductions" type="number" step="0.01" value="${p.deductions || 0}" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none"></div>
+      </div>
+      <div><label class="text-sm font-medium text-gray-700">Status</label>
+        <select id="pay-status" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-xl outline-none">
+          <option ${p.status==='Pending'?'selected':''}>Pending</option>
+          <option ${p.status==='Paid'?'selected':''}>Paid</option>
+        </select></div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold">Save</button>
+      </div>
+    </form>
+  `);
+
+  document.getElementById('pay-employee').addEventListener('change', (e) => {
+    if (p.id) return; // don't overwrite on edit
+    const salary = e.target.selectedOptions[0]?.dataset.salary;
+    if (salary) document.getElementById('pay-basic').value = salary;
+  });
+
+  document.getElementById('pay-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      employee_id: Number(document.getElementById('pay-employee').value),
+      month: document.getElementById('pay-month').value,
+      basic_salary: Number(document.getElementById('pay-basic').value || 0),
+      bonus: Number(document.getElementById('pay-bonus').value || 0),
+      deductions: Number(document.getElementById('pay-deductions').value || 0),
+      status: document.getElementById('pay-status').value
+    };
+    try {
+      if (p.id) await apiPut(`/api/payroll/${p.id}`, payload);
+      else await apiPost('/api/payroll', payload);
+      closeModal(); navigate('payroll');
+    } catch (err) { alert(err.message); }
+  });
+}
+async function deletePayroll(id) {
+  if (!confirm('Delete this payroll record?')) return;
+  await apiDelete(`/api/payroll/${id}`);
+  navigate('payroll');
+}
+</script>
+</body>
+</html>
