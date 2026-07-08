@@ -15,8 +15,8 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and
 
 app = Flask(__name__)
 
-MOCK_EMAIL = "admin@nexorahr.com"
-MOCK_PASSWORD = "Nexora2026"
+MOCK_EMAIL = "nexora@gmailcom"
+MOCK_PASSWORD = "nexoraindia099"
 
 
 def error_response(message, code=400):
